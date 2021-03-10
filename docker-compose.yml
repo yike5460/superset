@@ -14,24 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-x-superset-image: &superset-image apache/superset:latest-dev
+x-superset-image: &superset-image public.ecr.aws/p9r6s5p7/superset:latest
+x-superset-node-image: &superset-node-image public.ecr.aws/p9r6s5p7/superset-node:latest
 x-superset-depends-on: &superset-depends-on
   - db
   - redis
 x-superset-volumes: &superset-volumes
   # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
-  - ./docker:/app/docker
-  - ./superset:/app/superset
-  - ./superset-frontend:/app/superset-frontend
+  # - ./docker:/app/docker
+  # - ./superset:/app/superset
+  # - ./superset-frontend:/app/superset-frontend
   - superset_home:/app/superset_home
-  - ./tests:/app/tests
+  # - ./tests:/app/tests
 
 version: "3.7"
 services:
   redis:
     image: redis:latest
     container_name: superset_cache
-    restart: unless-stopped
+    # restart: unless-stopped
     ports:
       - "127.0.0.1:6379:6379"
     volumes:
@@ -41,7 +42,7 @@ services:
     env_file: docker/.env
     image: postgres:10
     container_name: superset_db
-    restart: unless-stopped
+    # restart: unless-stopped
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
@@ -52,7 +53,7 @@ services:
     image: *superset-image
     container_name: superset_app
     command: ["/app/docker/docker-bootstrap.sh", "app"]
-    restart: unless-stopped
+    # restart: unless-stopped
     ports:
       - 8088:8088
     user: "root"
@@ -73,19 +74,19 @@ services:
       CYPRESS_CONFIG: "${CYPRESS_CONFIG}"
 
   superset-node:
-    image: node:14
+    image: *superset-node-image
     container_name: superset_node
     command: ["/app/docker/docker-frontend.sh"]
     env_file: docker/.env
     depends_on: *superset-depends-on
-    volumes: *superset-volumes
+    # volumes: *superset-volumes
 
   superset-worker:
     image: *superset-image
     container_name: superset_worker
     command: ["/app/docker/docker-bootstrap.sh", "worker"]
     env_file: docker/.env
-    restart: unless-stopped
+    # restart: unless-stopped
     depends_on: *superset-depends-on
     user: "root"
     volumes: *superset-volumes
@@ -95,30 +96,35 @@ services:
     container_name: superset_worker_beat
     command: ["/app/docker/docker-bootstrap.sh", "beat"]
     env_file: docker/.env
-    restart: unless-stopped
+    # restart: unless-stopped
     depends_on: *superset-depends-on
     user: "root"
     volumes: *superset-volumes
 
-  superset-tests-worker:
-    image: *superset-image
-    container_name: superset_tests_worker
-    command: ["/app/docker/docker-bootstrap.sh", "worker"]
-    env_file: docker/.env
-    environment:
-      DATABASE_HOST: localhost
-      DATABASE_DB: test
-      REDIS_CELERY_DB: 2
-      REDIS_RESULTS_DB: 3
-      REDIS_HOST: localhost
-    network_mode: host
-    depends_on: *superset-depends-on
-    user: "root"
-    volumes: *superset-volumes
+  # superset-tests-worker:
+  #   image: *superset-image
+  #   container_name: superset_tests_worker
+  #   command: ["/app/docker/docker-bootstrap.sh", "worker"]
+  #   env_file: docker/.env
+  #   environment:
+  #     DATABASE_HOST: localhost # db
+  #     DATABASE_DB: test # superset
+  #     REDIS_CELERY_DB: 2
+  #     REDIS_RESULTS_DB: 3
+  #     REDIS_HOST: localhost
+  #   # network_mode: host
+  #   depends_on: *superset-depends-on
+  #   user: "root"
+  #   volumes: *superset-volumes
 
 volumes:
   superset_home:
     external: false
+    # driver_opts:
+    #   performance-mode: maxIO
+    #   throughput-mode: bursting
+    #   uid: 0
+    #   gid: 0
   db_home:
     external: false
   redis:
