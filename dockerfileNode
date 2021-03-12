@@ -1,0 +1,7 @@
+FROM node:14
+
+# workaround for host volume not support in fargate
+RUN set -e
+RUN mkdir -p /app/superset-frontend
+COPY ./superset-master/superset-frontend /app/superset-frontend
+COPY ./superset-master/docker /app/docker

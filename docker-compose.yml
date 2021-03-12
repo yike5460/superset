@@ -21,11 +21,11 @@ x-superset-depends-on: &superset-depends-on
   - redis
 x-superset-volumes: &superset-volumes
   # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
-  # - ./docker:/app/docker
-  # - ./superset:/app/superset
-  # - ./superset-frontend:/app/superset-frontend
+  # - ./docker:/app/docker # pack /app/docker folder into image directly
+  # - ./superset:/app/superset # included in orign image
+  # - ./superset-frontend:/app/superset-frontend # pack superset-frontend folder into image directly
   - superset_home:/app/superset_home
-  # - ./tests:/app/tests
+  # - ./tests:/app/tests # obsolete for production
 
 version: "3.7"
 services:
