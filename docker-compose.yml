@@ -28,10 +28,20 @@ x-superset-volumes: &superset-volumes
   # - ./tests:/app/tests # obsolete for production
 
 version: "3.7"
+# multiplex existing resource including ecs cluster, vpc, nlb/alb and security group
+x-aws-vpc: "vpc-02688d55540858e5c"
+# x-aws-cluster: "ClusterName"
+# x-aws-loadbalancer: "LoadBalancerName"
+# networks:
+#   back_tier:
+#     external: true
+#     name: "sg-1234acbd"
+
 services:
   redis:
     image: redis:latest
     container_name: superset_cache
+    ## not support in ecs fargate mapping
     # restart: unless-stopped
     ports:
       - "127.0.0.1:6379:6379"
@@ -42,6 +52,7 @@ services:
     env_file: docker/.env
     image: postgres:10
     container_name: superset_db
+    ## not support in ecs fargate mapping
     # restart: unless-stopped
     ports:
       - "127.0.0.1:5432:5432"
@@ -53,9 +64,12 @@ services:
     image: *superset-image
     container_name: superset_app
     command: ["/app/docker/docker-bootstrap.sh", "app"]
+    ## not support in ecs fargate mapping
     # restart: unless-stopped
     ports:
       - 8088:8088
+      ## http protocol with custom ports and get an ALB
+      # x-aws-protocol: http
     user: "root"
     depends_on: *superset-depends-on
     volumes: *superset-volumes
@@ -83,6 +97,20 @@ services:
 
   superset-worker:
     image: *superset-image
+    x-aws-policies:
+    - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+    - "arn:aws:iam::aws:policy/AmazonAthenaFullAccess"
+    ## customization option for task size and auto scale policy
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "1"
+    #       memory: 2Gb
+    #   x-aws-autoscaling:
+    #     min: 1
+    #     max: 10 #required
+    #     cpu: 75
+    #     # mem: - mutualy exlusive with cpu
     container_name: superset_worker
     command: ["/app/docker/docker-bootstrap.sh", "worker"]
     env_file: docker/.env
@@ -101,6 +129,7 @@ services:
     user: "root"
     volumes: *superset-volumes
 
+  ## obsolete for production case
   # superset-tests-worker:
   #   image: *superset-image
   #   container_name: superset_tests_worker
@@ -117,14 +146,29 @@ services:
   #   user: "root"
   #   volumes: *superset-volumes
 
+  ## customization option for healthcheck path and ssl termination
+  # x-aws-cloudformation:
+  #   Resources:
+  #     WebappTCP80TargetGroup:
+  #       Properties:
+  #         HealthCheckPath: /health
+  #         Matcher:
+  #           HttpCode: 200-499
+            # Certificates:
+            #   - CertificateArn: "arn:aws:acm:certificate/123abc"
+            # Protocol: HTTPS
+
 volumes:
   superset_home:
     external: false
     # driver_opts:
-    #   performance-mode: maxIO
-    #   throughput-mode: bursting
     #   uid: 0
     #   gid: 0
+    #   backup_policy: ENABLED
+    #   lifecycle_policy: AFTER_30_DAYS
+    #   performance_mode: maxIO
+    #   throughput_mode: provisioned/bursting
+    #   provisioned_throughput: 1024
   db_home:
     external: false
   redis:

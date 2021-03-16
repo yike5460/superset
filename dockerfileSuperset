@@ -1,15 +1,24 @@
 FROM apache/superset
 # Switching to root to install the required packages
 USER root
-# Example: installing the MySQL driver to connect to the metadata database
-# if you prefer Postgres, you may want to use `psycopg2-binary` instead
-RUN pip install mysqlclient
-# Example: installing a driver to connect to Redshift
-# Find which driver you need based on the analytics database
-# you want to connect to here:
-# https://superset.apache.org/installation.html#database-dependencies
-RUN pip install sqlalchemy-redshift
-# Switching back to using the `superset` user
 
-COPY ./superset-master/docker /app/docker/
+# install database drivers for athena and redshift, refer to https://superset.apache.org/docs/databases/installing-database-drivers
+
+# mysql://<UserName>:<DBPassword>@<Database Host>/<Database Name>
+RUN pip install mysqlclient
+
+# postgresql://<UserName>:<DBPassword>@<Database Host>/<Database Name>
+RUN pip install psycopg2
+
+# awsathena+rest://{aws_access_key_id}:{aws_secret_access_key}@athena.{region_name}.amazonaws.com/{
+RUN pip install "PyAthenaJDBC>1.0.9"
+RUN pip install "PyAthena>1.2.0"
+
+# redshift+psycopg2://<userName>:<DBPassword>@<AWS End Point>:5439/<Database Name>
+RUN pip install sqlalchemy-redshift
+
+# replacement for volume config "- ./docker:/app/docker" in original docker-compose file
+COPY ./docker /app/docker/
+
+# Switching back to using the `superset` user
 USER superset
