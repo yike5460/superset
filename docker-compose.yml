@@ -21,9 +21,9 @@ x-superset-depends-on: &superset-depends-on
   - redis
 x-superset-volumes: &superset-volumes
   # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
-  # - ./docker:/app/docker # pack /app/docker folder into image directly
-  # - ./superset:/app/superset # included in orign image
-  # - ./superset-frontend:/app/superset-frontend # pack superset-frontend folder into image directly
+  # - ./docker:/app/docker # missing in both superset and node image, pack /app/docker folder directly
+  # - ./superset:/app/superset # included in orign superset image except node image
+  # - ./superset-frontend:/app/superset-frontend # included in orign superset image except node image, pack superset-frontend folder into image directly
   - superset_home:/app/superset_home
   # - ./tests:/app/tests # obsolete for production
 
@@ -62,6 +62,9 @@ services:
   superset:
     env_file: docker/.env
     image: *superset-image
+    x-aws-policies:
+    - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+    - "arn:aws:iam::aws:policy/AmazonAthenaFullAccess"
     container_name: superset_app
     command: ["/app/docker/docker-bootstrap.sh", "app"]
     ## not support in ecs fargate mapping
@@ -93,13 +96,10 @@ services:
     command: ["/app/docker/docker-frontend.sh"]
     env_file: docker/.env
     depends_on: *superset-depends-on
-    # volumes: *superset-volumes
+    volumes: *superset-volumes
 
   superset-worker:
     image: *superset-image
-    x-aws-policies:
-    - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-    - "arn:aws:iam::aws:policy/AmazonAthenaFullAccess"
     ## customization option for task size and auto scale policy
     # deploy:
     #   resources:

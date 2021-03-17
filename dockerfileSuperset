@@ -17,8 +17,14 @@ RUN pip install "PyAthena>1.2.0"
 # redshift+psycopg2://<userName>:<DBPassword>@<AWS End Point>:5439/<Database Name>
 RUN pip install sqlalchemy-redshift
 
+# workaround for host volume not support in fargate
 # replacement for volume config "- ./docker:/app/docker" in original docker-compose file
 COPY ./docker /app/docker/
+# more notes for alternatives for volume configure:
+#   - ./superset:/app/superset already included in orignal superset image
+#   - ./superset-frontend:/app/superset-frontend already included in orignal superset image
+#   - superset_home:/app/superset_home external volume in efs
+#   - ./tests:/app/tests obsolete in production usage
 
 # Switching back to using the `superset` user
 USER superset
