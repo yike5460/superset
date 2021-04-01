@@ -847,6 +847,8 @@ Resources:
       TargetType: ip
       VpcId: !Ref Vpc
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
+
+  ## superset app definition
   SupersetTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -907,7 +909,7 @@ Resources:
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
-        Image: public.ecr.aws/p9r6s5p7/superset:latest@sha256:5b7cc9ee64a23b7669e675fdccb8dacc7c01abe44e94dce16565cc003d3712b1
+        Image: public.ecr.aws/p9r6s5p7/superset:latest
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -926,11 +928,11 @@ Resources:
           HostPort: 8088
           Protocol: tcp
         User: root
-      Cpu: "256"
+      Cpu: "4096"
       ExecutionRoleArn:
         Ref: SupersetTaskExecutionRole
       Family: supersetOnAWS-superset
-      Memory: "512"
+      Memory: "16384"
       NetworkMode: awsvpc
       RequiresCompatibilities:
       - FARGATE
@@ -1102,6 +1104,8 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
+  
+  ## init task definition
   SupersetinitTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -1161,7 +1165,7 @@ Resources:
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
-        Image: public.ecr.aws/p9r6s5p7/superset:latest@sha256:5b7cc9ee64a23b7669e675fdccb8dacc7c01abe44e94dce16565cc003d3712b1
+        Image: public.ecr.aws/p9r6s5p7/superset:latest
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -1176,11 +1180,11 @@ Resources:
           SourceVolume: superset_home
         Name: superset-init
         User: root
-      Cpu: "256"
+      Cpu: "4096"
       ExecutionRoleArn:
         Ref: SupersetinitTaskExecutionRole
       Family: supersetOnAWS-superset-init
-      Memory: "512"
+      Memory: "16384"
       NetworkMode: awsvpc
       RequiresCompatibilities:
       - FARGATE
@@ -1369,7 +1373,7 @@ Resources:
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
-        Image: public.ecr.aws/p9r6s5p7/superset-node:latest@sha256:f699bef9da3244e55b45a16cf6d6fa092d850d3aca209f9402ad4c30a3930a83
+        Image: public.ecr.aws/p9r6s5p7/superset-node:latest
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -1516,6 +1520,8 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
+  
+  ## celery worker definition
   SupersetworkerTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -1577,7 +1583,7 @@ Resources:
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
-        Image: public.ecr.aws/p9r6s5p7/superset:latest@sha256:5b7cc9ee64a23b7669e675fdccb8dacc7c01abe44e94dce16565cc003d3712b1
+        Image: public.ecr.aws/p9r6s5p7/superset:latest
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -1592,11 +1598,11 @@ Resources:
           SourceVolume: superset_home
         Name: superset-worker
         User: root
-      Cpu: "256"
+      Cpu: "4096"
       ExecutionRoleArn:
         Ref: SupersetworkerTaskExecutionRole
       Family: supersetOnAWS-superset-worker
-      Memory: "512"
+      Memory: "16384"
       NetworkMode: awsvpc
       RequiresCompatibilities:
       - FARGATE
@@ -1725,6 +1731,8 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
+
+  ## celery beat definition
   SupersetworkerbeatTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -1786,7 +1794,7 @@ Resources:
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
-        Image: public.ecr.aws/p9r6s5p7/superset:latest@sha256:5b7cc9ee64a23b7669e675fdccb8dacc7c01abe44e94dce16565cc003d3712b1
+        Image: public.ecr.aws/p9r6s5p7/superset:latest
         LinuxParameters: {}
         LogConfiguration:
           LogDriver: awslogs
@@ -1801,11 +1809,11 @@ Resources:
           SourceVolume: superset_home
         Name: superset-worker-beat
         User: root
-      Cpu: "256"
+      Cpu: "4096"
       ExecutionRoleArn:
         Ref: SupersetworkerbeatTaskExecutionRole
       Family: supersetOnAWS-superset-worker-beat
-      Memory: "512"
+      Memory: "16384"
       NetworkMode: awsvpc
       RequiresCompatibilities:
       - FARGATE

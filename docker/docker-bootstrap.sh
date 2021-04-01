@@ -26,6 +26,11 @@ if [ "$CYPRESS_CONFIG" == "true" ]; then
     export ENABLE_REACT_CRUD_VIEWS=true
     export SUPERSET__SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://superset:superset@db:5432/superset
 fi
+
+pip install plotly
+pip install pystan==2.18.0.0
+pip install fbprophet
+
 #
 # Make sure we have dev requirements installed
 #
