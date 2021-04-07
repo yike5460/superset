@@ -44,6 +44,10 @@ RUN pip install sqlalchemy-redshift
 # workaround for host volume not support in fargate
 # replacement for volume config "- ./docker:/app/docker" in original docker-compose file
 COPY ./docker /app/docker/
+
+# workaround to load dashboard example from s3 bucket instead of github
+COPY ./superset/examples/helpers.py /app/superset/examples/helpers.py
+
 # more notes for alternatives for volume configure:
 #   - ./superset:/app/superset already included in orignal superset image
 #   - ./superset-frontend:/app/superset-frontend already included in orignal superset image

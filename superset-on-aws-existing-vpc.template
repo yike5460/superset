@@ -1797,8 +1797,8 @@ Resources:
         Value: superset-worker-beat
     Type: AWS::IAM::Role
 
-## todo
+## superset console url
 Outputs:
   SupersetConsole:
     Description: SupersetConsole URL
-    Value: !GetAtt LoadBalancer.DNSName
+    Value: !Join [ ":", [ !GetAtt LoadBalancer.DNSName, 8088 ] ]
