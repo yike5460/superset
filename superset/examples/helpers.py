@@ -27,7 +27,8 @@ from superset.connectors.connector_registry import ConnectorRegistry
 from superset.models import core as models
 from superset.models.slice import Slice
 
-BASE_URL = "https://github.com/apache-superset/examples-data/blob/master/"
+# BASE_URL = "https://github.com/apache-superset/examples-data/blob/master/"
+BASE_URL = "https://superset-examples-data.s3.cn-north-1.amazonaws.com.cn/data/"
 
 # Shortcuts
 DB = models.Database
@@ -71,7 +72,7 @@ def get_slice_json(defaults: Dict[Any, Any], **kwargs: Any) -> str:
 def get_example_data(
     filepath: str, is_gzip: bool = True, make_bytes: bool = False
 ) -> BytesIO:
-    content = request.urlopen(f"{BASE_URL}{filepath}?raw=true").read()
+    content = request.urlopen(f"{BASE_URL}{filepath}").read()
     if is_gzip:
         content = zlib.decompress(content, zlib.MAX_WBITS | 16)
     if make_bytes:
