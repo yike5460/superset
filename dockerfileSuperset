@@ -48,6 +48,19 @@ COPY ./docker /app/docker/
 # workaround to load dashboard example from s3 bucket instead of github
 COPY ./superset/examples/helpers.py /app/superset/examples/helpers.py
 
+COPY ./superset/examples/configs/datasets/examples/FCC_2018_Survey.yaml /app/superset/examples/configs/datasets/examples/FCC_2018_Survey.yaml
+COPY ./superset/examples/configs/datasets/examples/channel_members.yaml /app/superset/examples/configs/datasets/examples/channel_members.yaml
+COPY ./superset/examples/configs/datasets/examples/channels.yaml /app/superset/examples/configs/datasets/examples/channels.yaml
+COPY ./superset/examples/configs/datasets/examples/cleaned_sales_data.yaml /app/superset/examples/configs/datasets/examples/cleaned_sales_data.yaml
+COPY ./superset/examples/configs/datasets/examples/covid_vaccines.yaml /app/superset/examples/configs/datasets/examples/covid_vaccines.yaml
+COPY ./superset/examples/configs/datasets/examples/exported_stats.yaml /app/superset/examples/configs/datasets/examples/exported_stats.yaml
+COPY ./superset/examples/configs/datasets/examples/messages.yaml /app/superset/examples/configs/datasets/examples/messages.yaml
+COPY ./superset/examples/configs/datasets/examples/threads.yaml /app/superset/examples/configs/datasets/examples/threads.yaml
+COPY ./superset/examples/configs/datasets/examples/unicode_test.test.yaml /app/superset/examples/configs/datasets/examples/unicode_test.test.yaml
+COPY ./superset/examples/configs/datasets/examples/users.yaml /app/superset/examples/configs/datasets/examples/users.yaml
+COPY ./superset/examples/configs/datasets/examples/users_channels.yaml /app/superset/examples/configs/datasets/examples/users_channels.yaml
+COPY ./superset/examples/configs/datasets/examples/video_game_sales.yaml /app/superset/examples/configs/datasets/examples/video_game_sales.yaml
+
 # more notes for alternatives for volume configure:
 #   - ./superset:/app/superset already included in orignal superset image
 #   - ./superset-frontend:/app/superset-frontend already included in orignal superset image

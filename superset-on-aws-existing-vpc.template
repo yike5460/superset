@@ -26,15 +26,15 @@ Parameters:
   Vpc:
     Type: AWS::EC2::VPC::Id
     Description: VPC ID to create ECS cluster
-  CNAME:
-    Type: String
-    Default: www.example.cn
-    Description: Alternate Domain Names for Application Load Balancer
-    MinLength: 4
-    MaxLength: 30
-    # 6 subdomain at most, like dlt.keyi.solutions.aws.a2z.org.cn
-    AllowedPattern: "^((https?)://)?(www.)?[a-z0-9]+(.[a-z0-9]{1,}){1,6}$"
-    ConstraintDescription: "must be valid CNAME name"
+  # CNAME:
+  #   Type: String
+  #   Default: www.example.cn
+  #   Description: Alternate Domain Names for Application Load Balancer
+  #   MinLength: 4
+  #   MaxLength: 30
+  #   # 6 subdomain at most, like dlt.keyi.solutions.aws.a2z.org.cn
+  #   AllowedPattern: "^((https?)://)?(www.)?[a-z0-9]+(.[a-z0-9]{1,}){1,6}$"
+  #   ConstraintDescription: "must be valid CNAME name"
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -327,7 +327,7 @@ Resources:
       - Key: com.docker.compose.volume
         Value: db_home
       - Key: Name
-        Value: supersetOnAWS_db_home
+        Value: supersetOnAWSExistedVPC_db_home
       FileSystemId:
         Ref: DbhomeFilesystem
     Type: AWS::EFS::AccessPoint
@@ -341,7 +341,7 @@ Resources:
       - Key: com.docker.compose.volume
         Value: db_home
       - Key: Name
-        Value: supersetOnAWS_db_home
+        Value: supersetOnAWSExistedVPC_db_home
     Type: AWS::EFS::FileSystem
   DbhomeNFSMountTargetOnSubnetA:
     Properties:
@@ -396,7 +396,7 @@ Resources:
       - Key: com.docker.compose.project
         Value: supersetOnAWSExistedVPC
       - Key: com.docker.compose.network
-        Value: supersetOnAWS_default
+        Value: supersetOnAWSExistedVPC_default
       VpcId: !Ref Vpc
     Type: AWS::EC2::SecurityGroup
   DefaultNetworkIngress:
@@ -437,7 +437,7 @@ Resources:
       - Key: com.docker.compose.volume
         Value: redis
       - Key: Name
-        Value: supersetOnAWS_redis
+        Value: supersetOnAWSExistedVPC_redis
       FileSystemId:
         Ref: RedisFilesystem
     Type: AWS::EFS::AccessPoint
@@ -451,7 +451,7 @@ Resources:
       - Key: com.docker.compose.volume
         Value: redis
       - Key: Name
-        Value: supersetOnAWS_redis
+        Value: supersetOnAWSExistedVPC_redis
     Type: AWS::EFS::FileSystem
   RedisNFSMountTargetOnSubnetA:
     Properties:
@@ -924,7 +924,7 @@ Resources:
       - Key: com.docker.compose.volume
         Value: superset_home
       - Key: Name
-        Value: supersetOnAWS_superset_home
+        Value: supersetOnAWSExistedVPC_superset_home
       FileSystemId:
         Ref: SupersethomeFilesystem
     Type: AWS::EFS::AccessPoint
@@ -938,7 +938,7 @@ Resources:
       - Key: com.docker.compose.volume
         Value: superset_home
       - Key: Name
-        Value: supersetOnAWS_superset_home
+        Value: supersetOnAWSExistedVPC_superset_home
     Type: AWS::EFS::FileSystem
   SupersethomeNFSMountTargetOnSubnetA:
     Properties:
