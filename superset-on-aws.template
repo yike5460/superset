@@ -316,6 +316,10 @@ Resources:
           Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
+        - Name: SUPERSET_USER
+          Value: !Ref UserName
+        - Name: SUPERSET_PASSWORD
+          Value: !Ref UserPassword
         Essential: true
         Image: docker.io/library/postgres:10@sha256:e5802ff7be3c818ce23924fe27e29621ba1120bfdc572232dc6cd0154f8c844f
         LinuxParameters: {}
@@ -909,6 +913,10 @@ Resources:
           Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
+        - Name: SUPERSET_USER
+          Value: !Ref UserName
+        - Name: SUPERSET_PASSWORD
+          Value: !Ref UserPassword
         - Name: InstallProphet
           Value: !Ref InstallProphet
         Essential: true
@@ -1167,6 +1175,10 @@ Resources:
           Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
+        - Name: SUPERSET_USER
+          Value: !Ref UserName
+        - Name: SUPERSET_PASSWORD
+          Value: !Ref UserPassword
         Essential: true
         Image: public.ecr.aws/p9r6s5p7/superset:latest
         LinuxParameters: {}
@@ -1377,6 +1389,10 @@ Resources:
           Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
+        - Name: SUPERSET_USER
+          Value: !Ref UserName
+        - Name: SUPERSET_PASSWORD
+          Value: !Ref UserPassword
         Essential: true
         Image: public.ecr.aws/p9r6s5p7/superset-node:latest
         LinuxParameters: {}
@@ -1392,11 +1408,11 @@ Resources:
         - ContainerPath: /app/superset_home
           SourceVolume: superset_home
         Name: superset-node
-      Cpu: "256"
+      Cpu: "4096"
       ExecutionRoleArn:
         Ref: SupersetnodeTaskExecutionRole
       Family: supersetOnAWS-superset-node
-      Memory: "512"
+      Memory: "8192"
       NetworkMode: awsvpc
       RequiresCompatibilities:
       - FARGATE
@@ -1587,6 +1603,10 @@ Resources:
           Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
+        - Name: SUPERSET_USER
+          Value: !Ref UserName
+        - Name: SUPERSET_PASSWORD
+          Value: !Ref UserPassword
         Essential: true
         Image: public.ecr.aws/p9r6s5p7/superset:latest
         LinuxParameters: {}
@@ -1798,6 +1818,10 @@ Resources:
           Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
+        - Name: SUPERSET_USER
+          Value: !Ref UserName
+        - Name: SUPERSET_PASSWORD
+          Value: !Ref UserPassword
         Essential: true
         Image: public.ecr.aws/p9r6s5p7/superset:latest
         LinuxParameters: {}
