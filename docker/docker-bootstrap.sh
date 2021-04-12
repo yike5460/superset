@@ -27,10 +27,6 @@ if [ "$CYPRESS_CONFIG" == "true" ]; then
     export SUPERSET__SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://superset:superset@db:5432/superset
 fi
 
-pip install plotly
-pip install pystan==2.18.0.0
-pip install fbprophet
-
 #
 # Make sure we have dev requirements installed
 #
@@ -49,5 +45,10 @@ elif [[ "${1}" == "beat" ]]; then
   celery beat --app=superset.tasks.celery_app:app --pidfile /tmp/celerybeat.pid -l INFO
 elif [[ "${1}" == "app" ]]; then
   echo "Starting web app..."
+  if [ "$InstallProphet" == "yes" ]; then
+    pip install plotly
+    pip install pystan==2.18.0.0
+    pip install fbprophet
+  fi
   flask run -p 8088 --with-threads --reload --debugger --host=0.0.0.0
 fi

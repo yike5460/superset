@@ -11,12 +11,19 @@ Parameters:
     Description: Superset user password for the Amazon Redshift cluster. The password must be 8 - 64 characters, contain at least one uppercase letter, at least one lowercase letter, and at least one number. It can only contain ASCII characters (ASCII codes 33-126), except ' (single quotation mark), " (double quotation mark), /, \, or @.
     NoEcho: True
   WithExample:
-    Type: Number
-    Default: 0
+    Type: String
+    Default: yes
     Description: >-
       Enables or disables pre-populating official dashboard example.
-      0 = DON'T pre-populate official dashboard example
-      1 = pre-populate official dashboard example
+      no = DON'T pre-populate official dashboard example
+      yes = pre-populate official dashboard example
+  InstallProphet:
+    Type: String
+    Default: "no"
+    Description: >-
+      Enables or disables Prophet library installation for Forecasting Analytics
+      no = DON'T install Prophet for Forecasting Analytics
+      yes = install Prophet to enable Forecasting Analytics
   PublicSubnetA:
     Type: AWS::EC2::Subnet::Id
     Description: CIDR block for subnet A of the AWS Fargate VPC
@@ -45,6 +52,7 @@ Metadata:
           - UserName
           - UserPassword
           - WithExample
+          - InstallProphet
       - Label:
           default: "Network Configuration, using exiting VPC for AWS ECS Fargate"
         Parameters:
@@ -58,6 +66,8 @@ Metadata:
         default: "Initial Superset User Password"
       WithExample:
         default: "Pre-populate example dashboard"
+      InstallProphet:
+        default: "Install Prophet library"
       PublicSubnetA:
         default: "AWS ECS Fargate Subnet A CIDR Block"
       PublicSubnetB:
@@ -220,7 +230,7 @@ Resources:
         - Name: SUPERSET_ENV
           Value: development
         - Name: SUPERSET_LOAD_EXAMPLES
-          Value: "yes"
+          Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
@@ -813,9 +823,11 @@ Resources:
         - Name: SUPERSET_ENV
           Value: development
         - Name: SUPERSET_LOAD_EXAMPLES
-          Value: "yes"
+          Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
+        - Name: InstallProphet
+          Value: !Ref InstallProphet
         Essential: true
         Image: public.ecr.aws/p9r6s5p7/superset:latest
         LinuxParameters: {}
@@ -1069,7 +1081,7 @@ Resources:
         - Name: SUPERSET_ENV
           Value: development
         - Name: SUPERSET_LOAD_EXAMPLES
-          Value: "yes"
+          Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
@@ -1279,7 +1291,7 @@ Resources:
         - Name: SUPERSET_ENV
           Value: development
         - Name: SUPERSET_LOAD_EXAMPLES
-          Value: "yes"
+          Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
@@ -1489,7 +1501,7 @@ Resources:
         - Name: SUPERSET_ENV
           Value: development
         - Name: SUPERSET_LOAD_EXAMPLES
-          Value: "yes"
+          Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
@@ -1700,7 +1712,7 @@ Resources:
         - Name: SUPERSET_ENV
           Value: development
         - Name: SUPERSET_LOAD_EXAMPLES
-          Value: "yes"
+          Value: !Ref WithExample
         - Name: SUPERSET_PORT
           Value: "8088"
         Essential: true
