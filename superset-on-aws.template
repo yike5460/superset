@@ -96,7 +96,7 @@ Metadata:
         default: "AWS ECS Fargate Subnet B CIDR Block"
 
 Resources:
-  ## VPC
+  ## VPC Network
   Vpc:
     Type: AWS::EC2::VPC
     Properties:
@@ -159,8 +159,6 @@ Resources:
     Properties:
       RouteTableId: !Ref MainRouteTable
       SubnetId: !Ref PublicSubnetB
-
-  ## native compose yaml
   CloudMap:
     Properties:
       Description: Service Map for Docker Compose project supersetOnAWS
@@ -174,6 +172,8 @@ Resources:
       - Key: com.docker.compose.project
         Value: supersetOnAWS
     Type: AWS::ECS::Cluster
+
+  ## ECS Service - Database
   DbService:
     DependsOn:
     - DbTCP5432Listener
@@ -456,6 +456,8 @@ Resources:
       - Ref: DefaultNetwork
       SubnetId: !Ref PublicSubnetB
     Type: AWS::EFS::MountTarget
+
+  ## Security Group
   Default5432Ingress:
     Properties:
       CidrIp: 0.0.0.0/0
@@ -522,10 +524,13 @@ Resources:
       Type: network
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
 
+  ## CloudWatch Log
   LogGroup:
     Properties:
       LogGroupName: /docker-compose/supersetOnAWS1983
     Type: AWS::Logs::LogGroup
+
+  ## ECS Service - Superset redis
   RedisAccessPoint:
     Properties:
       AccessPointTags:
@@ -766,7 +771,7 @@ Resources:
         Value: redis
     Type: AWS::IAM::Role
   
-  ## ECS
+  ## ECS Service - Superset app
   SupersetService:
     DependsOn:
     - SupersetTCP8088Listener
@@ -852,8 +857,6 @@ Resources:
       TargetType: ip
       VpcId: !Ref Vpc
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
-
-  ## superset app definition
   SupersetTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -1059,6 +1062,8 @@ Resources:
       - Ref: DefaultNetwork
       SubnetId: !Ref PublicSubnetB
     Type: AWS::EFS::MountTarget
+
+  ## ECS Service - Superset init
   SupersetinitService:
     DependsOn:
     - DbService
@@ -1115,8 +1120,6 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
-  
-  ## init task definition
   SupersetinitTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -1179,7 +1182,7 @@ Resources:
           Value: !Ref UserName
         - Name: SUPERSET_PASSWORD
           Value: !Ref UserPassword
-        Essential: true
+        Essential: false
         Image: public.ecr.aws/p9r6s5p7/superset:latest
         LinuxParameters: {}
         LogConfiguration:
@@ -1195,11 +1198,35 @@ Resources:
           SourceVolume: superset_home
         Name: superset-init
         User: root
-      Cpu: "4096"
+      - Command:
+        - aws
+        - ecs
+        - update-service
+        - --cluster
+        - supersetOnAWS
+        - --service
+        - supersetInitService
+        - --desired-count
+        - 0
+        DependsOn:
+        - Condition: SUCCESS
+          ContainerName: superset-init
+        Essential: true
+        Image: amazon/aws-cli
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: LogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: supersetOnAWS
+        Name: superset-init-cleanup
+      Cpu: "512"
       ExecutionRoleArn:
         Ref: SupersetinitTaskExecutionRole
       Family: supersetOnAWS-superset-init
-      Memory: "16384"
+      Memory: "1024"
       NetworkMode: awsvpc
       RequiresCompatibilities:
       - FARGATE
@@ -1247,6 +1274,8 @@ Resources:
           Principal:
             Service: ecs-tasks.amazonaws.com
         Version: 2012-10-17
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonECS_FullAccess
       Policies:
       - PolicyDocument:
           Statement:
@@ -1272,6 +1301,8 @@ Resources:
       - Key: com.docker.compose.service
         Value: superset-init
     Type: AWS::IAM::Role
+
+  ## ECS Service - Superset node
   SupersetnodeService:
     DependsOn:
     - DbService
@@ -1328,8 +1359,6 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
-
-  ## superset node definition
   SupersetnodeTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -1485,6 +1514,8 @@ Resources:
       - Key: com.docker.compose.service
         Value: superset-node
     Type: AWS::IAM::Role
+
+  ## ECS Service - Superset celery worker
   SupersetworkerService:
     DependsOn:
     - DbService
@@ -1541,8 +1572,6 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
-  
-  ## celery worker definition
   SupersetworkerTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -1700,6 +1729,8 @@ Resources:
       - Key: com.docker.compose.service
         Value: superset-worker
     Type: AWS::IAM::Role
+
+  ## ECS Service - Superset celery beat
   SupersetworkerbeatService:
     DependsOn:
     - DbService
@@ -1756,8 +1787,6 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
-
-  ## celery beat definition
   SupersetworkerbeatTaskDefinition:
     Properties:
       ContainerDefinitions:
