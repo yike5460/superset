@@ -5,24 +5,24 @@ Description: "(xx-xxxx) - Superset on AWS offer customer a reliable, scalable an
 Parameters:
   UserName:
     Type: String
-    Description: Superset user name. The user name must be lowercase, begin with a letter, contain only alphanumeric characters, '_', '+', '.', '@', or '-', and be less than 128 characters.
+    Description: Superset user name.
   UserPassword:
     Type: String
-    Description: Superset user password for the Amazon Redshift cluster. The password must be 8 - 64 characters, contain at least one uppercase letter, at least one lowercase letter, and at least one number. It can only contain ASCII characters (ASCII codes 33-126), except ' (single quotation mark), " (double quotation mark), /, \, or @.
+    Description: Superset user password. Strict password policy is recommended.
     NoEcho: True
   WithExample:
     Type: String
     Default: "yes"
     Description: >-
       Enables or disables pre-populating official dashboard example.
-      no = DON'T pre-populate official dashboard example
+      no = DON'T pre-populate official dashboard example;
       yes = pre-populate official dashboard example
   InstallProphet:
     Type: String
     Default: "no"
     Description: >-
-      Enables or disables Prophet library installation for Forecasting Analytics
-      no = DON'T install Prophet for Forecasting Analytics
+      Enables or disables Prophet library installation for Forecasting Analytics.
+      no = DON'T install Prophet for Forecasting Analytics;
       yes = install Prophet to enable Forecasting Analytics
   PublicSubnetA:
     Type: AWS::EC2::Subnet::Id
@@ -33,15 +33,6 @@ Parameters:
   Vpc:
     Type: AWS::EC2::VPC::Id
     Description: VPC ID to create ECS cluster
-  # CNAME:
-  #   Type: String
-  #   Default: www.example.cn
-  #   Description: Alternate Domain Names for Application Load Balancer
-  #   MinLength: 4
-  #   MaxLength: 30
-  #   # 6 subdomain at most, like dlt.keyi.solutions.aws.a2z.org.cn
-  #   AllowedPattern: "^((https?)://)?(www.)?[a-z0-9]+(.[a-z0-9]{1,}){1,6}$"
-  #   ConstraintDescription: "must be valid CNAME name"
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -1118,7 +1109,6 @@ Resources:
         Name: superset-init
         User: root
       - Command:
-        - aws
         - ecs
         - update-service
         - --cluster
@@ -1221,7 +1211,7 @@ Resources:
         Value: superset-init
     Type: AWS::IAM::Role
 
-  ## ECS Service - Superset init
+  ## ECS Service - Superset node
   SupersetnodeService:
     DependsOn:
     - DbService
