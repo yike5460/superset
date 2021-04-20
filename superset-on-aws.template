@@ -420,7 +420,7 @@ Resources:
         Ref: DbhomeFilesystem
     Type: AWS::EFS::AccessPoint
   DbhomeFilesystem:
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     Properties:
       Encrypted: true
       FileSystemTags:
@@ -535,7 +535,7 @@ Resources:
         Ref: RedisFilesystem
     Type: AWS::EFS::AccessPoint
   RedisFilesystem:
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     Properties:
       Encrypted: true
       FileSystemTags:
@@ -1026,7 +1026,7 @@ Resources:
         Ref: SupersethomeFilesystem
     Type: AWS::EFS::AccessPoint
   SupersethomeFilesystem:
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     Properties:
       Encrypted: true
       FileSystemTags:
