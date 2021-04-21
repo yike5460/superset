@@ -28,29 +28,40 @@ Parameters:
     Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
       The logical order is preserved.'
     Type: List<AWS::EC2::AvailabilityZone::Name>
-  VpcCidrBlock:
+  VpcCIDR:
     Type: String
     Default: 192.168.0.0/16
-    Description: CIDR block of the new VPC where AWS Fargate will be placed
+    Description: Please enter the IP range (CIDR notation) for this VPC
     AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
     ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
     MinLength: 9
     MaxLength: 18
-  SubnetACidrBlock:
+  PublicSubnet1CIDR:
     Type: String
-    Default: 192.168.0.0/20
-    Description: CIDR block for subnet A of the AWS Fargate VPC
+    Default: 192.168.10.0/24
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
     AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
     ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
     MinLength: 9
     MaxLength: 18
-  SubnetBCidrBlock:
+  PublicSubnet2CIDR:
     Type: String
-    Default: 192.168.16.0/20
-    Description: CIDR block for subnet B of the AWS Fargate VPC
+    Default: 192.168.11.0/24
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
     AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
     ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
-
+  PrivateSubnet1CIDR:
+    Type: String
+    Default: 192.168.20.0/24
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
+    ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
+  PrivateSubnet2CIDR:
+    Type: String
+    Default: 192.168.21.0/24
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
+    ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -65,9 +76,11 @@ Metadata:
           default: "Network Configuration, create new VPC for AWS ECS Fargate"
         Parameters:
           - AvailabilityZones
-          - VpcCidrBlock
-          - SubnetACidrBlock
-          - SubnetBCidrBlock
+          - VpcCIDR
+          - PublicSubnet1CIDR
+          - PublicSubnet2CIDR
+          - PrivateSubnet1CIDR
+          - PrivateSubnet2CIDR
     ParameterLabels:
       UserName:
         default: "Initial Superset User Name"
@@ -79,77 +92,18 @@ Metadata:
         default: "Install Prophet library"
       AvailabilityZones:
         default: "Availability Zones"
-      VpcCidrBlock:
+      VpcCIDR:
         default: "AWS ECS Fargate VPC CIDR Block"
-      SubnetACidrBlock:
-        default: "AWS ECS Fargate Subnet A CIDR Block"
-      SubnetBCidrBlock:
-        default: "AWS ECS Fargate Subnet B CIDR Block"
-
+      PublicSubnet1CIDR:
+        default: "Public Subnet for the first Availability Zone"
+      PublicSubnet2CIDR:
+        default: "Public Subnet for the second Availability Zone"
+      PrivateSubnet1CIDR:
+        default: "Private Subnet for the first Availability Zone"
+      PrivateSubnet2CIDR:
+        default: "Private Subnet for the second Availability Zone"
 Resources:
-  ## VPC Network
-  Vpc:
-    Type: AWS::EC2::VPC
-    Properties:
-      CidrBlock: !Ref VpcCidrBlock
-      InstanceTenancy: default
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-      Tags:
-        - Key: SolutionId
-          Value: (xx-xxxx)
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W60
-            reason: This VPC is used by Fargates only, so it does not require to have VPC flow logs.
-  PublicSubnetA:
-    Type: AWS::EC2::Subnet
-    Properties:
-      CidrBlock: !Ref SubnetACidrBlock
-      AvailabilityZone:
-        !Select
-          - '0'
-          - !Ref 'AvailabilityZones'
-      VpcId: !Ref Vpc
-  PublicSubnetB:
-    Type: AWS::EC2::Subnet
-    Properties:
-      CidrBlock: !Ref SubnetBCidrBlock
-      AvailabilityZone:
-        !Select
-          - '1'
-          - !Ref 'AvailabilityZones'
-      VpcId: !Ref Vpc
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties: {}
-  MainRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref Vpc
-  GatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      VpcId: !Ref Vpc
-      InternetGatewayId: !Ref InternetGateway
-  RouteToInternet:
-    Type: AWS::EC2::Route
-    DependsOn: GatewayAttachment
-    Properties:
-      DestinationCidrBlock: 0.0.0.0/0
-      RouteTableId: !Ref MainRouteTable
-      GatewayId: !Ref InternetGateway
-  RouteTableAssociationA:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref MainRouteTable
-      SubnetId: !Ref PublicSubnetA
-  RouteTableAssociationB:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      RouteTableId: !Ref MainRouteTable
-      SubnetId: !Ref PublicSubnetB
+  ## Cloud Map
   CloudMap:
     Properties:
       Description: Service Map for Docker Compose project supersetOnAWS
@@ -163,6 +117,247 @@ Resources:
       - Key: com.docker.compose.project
         Value: supersetOnAWS
     Type: AWS::ECS::Cluster
+
+  ## VPC Network with NAT Gateway
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx)
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx)
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref Vpc
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx) Public Subnet (AZ1)
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+      CidrBlock: !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx) Public Subnet (AZ2)
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [ 0, !GetAZs  '' ]
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx) Private Subnet (AZ1)
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx) Private Subnet (AZ2)
+
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx) Nat Gateway 1
+
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx) Nat Gateway 2
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx) Public Routes
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx) Private Routes (AZ1)
+
+  DefaultPrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: (xx-xxxx) Private Routes (AZ2)
+
+  DefaultPrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2
+
+  ## Security Group
+  Default5432Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: db:5432/tcp on default network
+      FromPort: 5432
+      GroupId:
+        Ref: DefaultNetwork
+      IpProtocol: TCP
+      ToPort: 5432
+    Type: AWS::EC2::SecurityGroupIngress
+  Default6379Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: redis:6379/tcp on default network
+      FromPort: 6379
+      GroupId:
+        Ref: DefaultNetwork
+      IpProtocol: TCP
+      ToPort: 6379
+    Type: AWS::EC2::SecurityGroupIngress
+  Default8088Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: superset:8088/tcp on default network
+      FromPort: 8088
+      GroupId:
+        Ref: DefaultNetwork
+      IpProtocol: TCP
+      ToPort: 8088
+    Type: AWS::EC2::SecurityGroupIngress
+  DefaultNetwork:
+    Properties:
+      GroupDescription: supersetOnAWS Security Group for default network
+      Tags:
+      - Key: com.docker.compose.project
+        Value: supersetOnAWS
+      - Key: com.docker.compose.network
+        Value: supersetOnAWS_default
+      VpcId: !Ref Vpc
+    Type: AWS::EC2::SecurityGroup
+  DefaultNetworkIngress:
+    Properties:
+      Description: Allow communication within network default
+      GroupId:
+        Ref: DefaultNetwork
+      IpProtocol: "-1"
+      SourceSecurityGroupId:
+        Ref: DefaultNetwork
+    Type: AWS::EC2::SecurityGroupIngress
+
+  ## Application Load Balancer
+  LoadBalancer:
+    Properties:
+      LoadBalancerAttributes:
+      - Key: load_balancing.cross_zone.enabled
+        Value: "true"
+      Scheme: internet-facing
+      Subnets:
+      - !Ref PublicSubnet1
+      - !Ref PublicSubnet2
+      Tags:
+      - Key: com.docker.compose.project
+        Value: supersetOnAWS
+      Type: network
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+
+  ## CloudWatch Log
+  LogGroup:
+    Properties:
+      LogGroupName: /docker-compose/supersetOnAWS1983
+    Type: AWS::Logs::LogGroup
 
   ## ECS Service - Database
   DbService:
@@ -193,8 +388,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -437,7 +632,7 @@ Resources:
         Ref: DbhomeFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetA
+      SubnetId: !Ref PrivateSubnet1
     Type: AWS::EFS::MountTarget
   DbhomeNFSMountTargetOnSubnetB:
     Properties:
@@ -445,81 +640,8 @@ Resources:
         Ref: DbhomeFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetB
+      SubnetId: !Ref PrivateSubnet2
     Type: AWS::EFS::MountTarget
-
-  ## Security Group
-  Default5432Ingress:
-    Properties:
-      CidrIp: 0.0.0.0/0
-      Description: db:5432/tcp on default network
-      FromPort: 5432
-      GroupId:
-        Ref: DefaultNetwork
-      IpProtocol: TCP
-      ToPort: 5432
-    Type: AWS::EC2::SecurityGroupIngress
-  Default6379Ingress:
-    Properties:
-      CidrIp: 0.0.0.0/0
-      Description: redis:6379/tcp on default network
-      FromPort: 6379
-      GroupId:
-        Ref: DefaultNetwork
-      IpProtocol: TCP
-      ToPort: 6379
-    Type: AWS::EC2::SecurityGroupIngress
-  Default8088Ingress:
-    Properties:
-      CidrIp: 0.0.0.0/0
-      Description: superset:8088/tcp on default network
-      FromPort: 8088
-      GroupId:
-        Ref: DefaultNetwork
-      IpProtocol: TCP
-      ToPort: 8088
-    Type: AWS::EC2::SecurityGroupIngress
-  DefaultNetwork:
-    Properties:
-      GroupDescription: supersetOnAWS Security Group for default network
-      Tags:
-      - Key: com.docker.compose.project
-        Value: supersetOnAWS
-      - Key: com.docker.compose.network
-        Value: supersetOnAWS_default
-      VpcId: !Ref Vpc
-    Type: AWS::EC2::SecurityGroup
-  DefaultNetworkIngress:
-    Properties:
-      Description: Allow communication within network default
-      GroupId:
-        Ref: DefaultNetwork
-      IpProtocol: "-1"
-      SourceSecurityGroupId:
-        Ref: DefaultNetwork
-    Type: AWS::EC2::SecurityGroupIngress
-
-  ## Application Load Balancer
-  LoadBalancer:
-    Properties:
-      LoadBalancerAttributes:
-      - Key: load_balancing.cross_zone.enabled
-        Value: "true"
-      Scheme: internet-facing
-      Subnets:
-      - !Ref PublicSubnetB
-      - !Ref PublicSubnetA
-      Tags:
-      - Key: com.docker.compose.project
-        Value: supersetOnAWS
-      Type: network
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-
-  ## CloudWatch Log
-  LogGroup:
-    Properties:
-      LogGroupName: /docker-compose/supersetOnAWS1983
-    Type: AWS::Logs::LogGroup
 
   ## ECS Service - Superset redis
   RedisAccessPoint:
@@ -552,7 +674,7 @@ Resources:
         Ref: RedisFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetA
+      SubnetId: !Ref PrivateSubnet1
     Type: AWS::EFS::MountTarget
   RedisNFSMountTargetOnSubnetB:
     Properties:
@@ -560,7 +682,7 @@ Resources:
         Ref: RedisFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetB
+      SubnetId: !Ref PrivateSubnet2
     Type: AWS::EFS::MountTarget
   RedisService:
     DependsOn:
@@ -590,8 +712,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -793,8 +915,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1043,7 +1165,7 @@ Resources:
         Ref: SupersethomeFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetA
+      SubnetId: !Ref PrivateSubnet1
     Type: AWS::EFS::MountTarget
   SupersethomeNFSMountTargetOnSubnetB:
     Properties:
@@ -1051,7 +1173,7 @@ Resources:
         Ref: SupersethomeFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetB
+      SubnetId: !Ref PrivateSubnet2
     Type: AWS::EFS::MountTarget
 
   ## ECS Service - Superset init
@@ -1080,8 +1202,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1318,8 +1440,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1531,8 +1653,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1746,8 +1868,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1936,7 +2058,7 @@ Resources:
         Value: superset-worker-beat
     Type: AWS::IAM::Role
 
-## superset console url
+  ## superset console url
 Outputs:
   SupersetConsole:
     Description: SupersetConsole URL
