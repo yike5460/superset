@@ -458,9 +458,17 @@ CACHE_DEFAULT_TIMEOUT = 60 * 60 * 24  # 1 day
 
 # Default cache for Superset objects
 CACHE_CONFIG: CacheConfig = {"CACHE_TYPE": "null"}
+# CACHE_CONFIG: CacheConfig = {'CACHE_TYPE': 'RedisCache',
+#     # 'CACHE_DEFAULT_TIMEOUT': 60 * 60 * 24, # 1 day default (in secs)
+#     'CACHE_KEY_PREFIX': 'metadata_results',
+#     'CACHE_REDIS_URL': 'redis://supersetdefault-001.kuxqrz.0001.cnn1.cache.amazonaws.com.cn:6379/2',}
 
 # Cache for datasource metadata and query results
 DATA_CACHE_CONFIG: CacheConfig = {"CACHE_TYPE": "null"}
+# DATA_CACHE_CONFIG: CacheConfig = {'CACHE_TYPE': 'RedisCache',
+#     # 'CACHE_DEFAULT_TIMEOUT': 60 * 60 * 24, # 1 day default (in secs)
+#     'CACHE_KEY_PREFIX': 'charting_data_results',
+#     'CACHE_REDIS_URL': 'redis://supersetdefault-001.kuxqrz.0001.cnn1.cache.amazonaws.com.cn:6379/3',}
 
 # store cache keys by datasource UID (via CacheKey) for custom processing/invalidation
 STORE_CACHE_KEYS_IN_METADATA_DB = False

@@ -17,6 +17,9 @@ RUN pip install "PyAthena>1.2.0"
 # redshift+psycopg2://<userName>:<DBPassword>@<AWS End Point>:5439/<Database Name>
 RUN pip install sqlalchemy-redshift
 
+# clickhouse://{username}:{password}@{hostname}:{port}/{database}
+RUN pip install sqlalchemy-clickhouse
+
 # install prophet
 # option 1
 # RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
@@ -60,6 +63,9 @@ COPY ./superset/examples/configs/datasets/examples/unicode_test.test.yaml /app/s
 COPY ./superset/examples/configs/datasets/examples/users.yaml /app/superset/examples/configs/datasets/examples/users.yaml
 COPY ./superset/examples/configs/datasets/examples/users_channels.yaml /app/superset/examples/configs/datasets/examples/users_channels.yaml
 COPY ./superset/examples/configs/datasets/examples/video_game_sales.yaml /app/superset/examples/configs/datasets/examples/video_game_sales.yaml
+
+# CACHE_CONFIG and DATA_CACHE_CONFIG
+COPY ./superset/config.py /app/superset/config.py
 
 # more notes for alternatives for volume configure:
 #   - ./superset:/app/superset already included in orignal superset image

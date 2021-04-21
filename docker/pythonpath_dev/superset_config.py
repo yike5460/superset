@@ -67,11 +67,28 @@ REDIS_RESULTS_DB = get_env_variable("REDIS_CELERY_DB", 1)
 
 RESULTS_BACKEND = FileSystemCache("/app/superset_home/sqllab")
 
+# Default cache for Superset objects
+# CACHE_CONFIG = {
+#     'CACHE_TYPE': 'RedisCache',
+#     # 'CACHE_DEFAULT_TIMEOUT': 60 * 60 * 24, # 1 day default (in secs)
+#     'CACHE_KEY_PREFIX': 'metadata_results',
+#     'CACHE_REDIS_URL': 'redis://supersetdefault-001.kuxqrz.0001.cnn1.cache.amazonaws.com.cn:6379/2',
+# }
+
+# Cache for datasource metadata and query results, refer to https://superset.apache.org/docs/installation/cache
+# DATA_CACHE_CONFIG = {
+#     'CACHE_TYPE': 'RedisCache',
+#     # 'CACHE_DEFAULT_TIMEOUT': 60 * 60 * 24, # 1 day default (in secs)
+#     'CACHE_KEY_PREFIX': 'charting_data_results',
+#     'CACHE_REDIS_URL': 'redis://supersetdefault-001.kuxqrz.0001.cnn1.cache.amazonaws.com.cn:6379/3',
+# }
 
 class CeleryConfig(object):
     BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_CELERY_DB}"
+    # BROKER_URL = f"redis://supersetdefault-001.kuxqrz.0001.cnn1.cache.amazonaws.com.cn:6379/{REDIS_CELERY_DB}"
     CELERY_IMPORTS = ("superset.sql_lab",)
     CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_RESULTS_DB}"
+    # CELERY_RESULT_BACKEND = f"redis://supersetdefault-001.kuxqrz.0001.cnn1.cache.amazonaws.com.cn:6379/{REDIS_RESULTS_DB}"
     CELERY_ANNOTATIONS = {"tasks.add": {"rate_limit": "10/s"}}
     CELERY_TASK_PROTOCOL = 1
 
