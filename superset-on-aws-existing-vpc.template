@@ -24,12 +24,19 @@ Parameters:
       Enables or disables Prophet library installation for Forecasting Analytics.
       no = DON'T install Prophet for Forecasting Analytics;
       yes = install Prophet to enable Forecasting Analytics
-  PublicSubnetA:
+  PublicSubnet1:
     Type: AWS::EC2::Subnet::Id
-    Description: CIDR block for subnet A of the AWS Fargate VPC
-  PublicSubnetB:
+    Description: Public subnet in the first Availability Zone
+  PublicSubnet2:
     Type: AWS::EC2::Subnet::Id
-    Description: CIDR block for subnet B of the AWS Fargate VPC
+    Description: Public subnet in the second Availability Zone
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private subnet in the first Availability Zone
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Private subnet in the second Availability Zone
+
   Vpc:
     Type: AWS::EC2::VPC::Id
     Description: VPC ID to create ECS cluster
@@ -47,8 +54,10 @@ Metadata:
       - Label:
           default: "Network Configuration, using exiting VPC for AWS ECS Fargate"
         Parameters:
-          - PublicSubnetA
-          - PublicSubnetB
+          - PublicSubnet1
+          - PublicSubnet2
+          - PrivateSubnet1
+          - PrivateSubnet2
           - Vpc
     ParameterLabels:
       UserName:
@@ -59,15 +68,19 @@ Metadata:
         default: "Pre-populate example dashboard"
       InstallProphet:
         default: "Install Prophet library"
-      PublicSubnetA:
-        default: "AWS ECS Fargate Subnet A CIDR Block"
-      PublicSubnetB:
-        default: "AWS ECS Fargate Subnet B CIDR Block"
+      PublicSubnet1:
+        default: "Public Subnet for the first Availability Zone"
+      PublicSubnet2:
+        default: "Public Subnet for the second Availability Zone"
+      PrivateSubnet1:
+        default: "Private Subnet for the first Availability Zone"
+      PrivateSubnet2:
+        default: "Private Subnet for the second Availability Zone"
       Vpc:
         default: "VPC ID"
 
 Resources:
-  ## VPC Network
+  ## Cloud Map
   CloudMap:
     Properties:
       Description: Service Map for Docker Compose project supersetOnAWSExistedVPC
@@ -111,8 +124,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -355,7 +368,7 @@ Resources:
         Ref: DbhomeFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetA
+      SubnetId: !Ref PrivateSubnet1
     Type: AWS::EFS::MountTarget
   DbhomeNFSMountTargetOnSubnetB:
     Properties:
@@ -363,7 +376,7 @@ Resources:
         Ref: DbhomeFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetB
+      SubnetId: !Ref PrivateSubnet2
     Type: AWS::EFS::MountTarget
 
   ## Security Group
@@ -425,8 +438,8 @@ Resources:
         Value: "true"
       Scheme: internet-facing
       Subnets:
-      - !Ref PublicSubnetB
-      - !Ref PublicSubnetA
+      - !Ref PublicSubnet1
+      - !Ref PublicSubnet2
       Tags:
       - Key: com.docker.compose.project
         Value: supersetOnAWSExistedVPC
@@ -470,7 +483,7 @@ Resources:
         Ref: RedisFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetA
+      SubnetId: !Ref PrivateSubnet1
     Type: AWS::EFS::MountTarget
   RedisNFSMountTargetOnSubnetB:
     Properties:
@@ -478,7 +491,7 @@ Resources:
         Ref: RedisFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetB
+      SubnetId: !Ref PrivateSubnet2
     Type: AWS::EFS::MountTarget
   RedisService:
     DependsOn:
@@ -508,8 +521,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -711,8 +724,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -961,7 +974,7 @@ Resources:
         Ref: SupersethomeFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetA
+      SubnetId: !Ref PrivateSubnet1
     Type: AWS::EFS::MountTarget
   SupersethomeNFSMountTargetOnSubnetB:
     Properties:
@@ -969,7 +982,7 @@ Resources:
         Ref: SupersethomeFilesystem
       SecurityGroups:
       - Ref: DefaultNetwork
-      SubnetId: !Ref PublicSubnetB
+      SubnetId: !Ref PrivateSubnet2
     Type: AWS::EFS::MountTarget
 
   ## ECS Service - Superset init
@@ -998,8 +1011,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1236,8 +1249,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1449,8 +1462,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
@@ -1664,8 +1677,8 @@ Resources:
           SecurityGroups:
           - Ref: DefaultNetwork
           Subnets:
-          - !Ref PublicSubnetB
-          - !Ref PublicSubnetA
+          - !Ref PrivateSubnet1
+          - !Ref PrivateSubnet2
       PlatformVersion: 1.4.0
       PropagateTags: SERVICE
       SchedulingStrategy: REPLICA
