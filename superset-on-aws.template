@@ -362,7 +362,6 @@ Resources:
   ## ECS Service - Database
   DbService:
     DependsOn:
-    - DbTCP5432Listener
     - DbhomeNFSMountTargetOnSubnetB
     - DbhomeNFSMountTargetOnSubnetA
     Properties:
@@ -377,11 +376,6 @@ Resources:
         Type: ECS
       DesiredCount: 1
       LaunchType: FARGATE
-      LoadBalancers:
-      - ContainerName: db
-        ContainerPort: 5432
-        TargetGroupArn:
-          Ref: DbTCP5432TargetGroup
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
@@ -420,29 +414,6 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
-  DbTCP5432Listener:
-    Properties:
-      DefaultActions:
-      - ForwardConfig:
-          TargetGroups:
-          - TargetGroupArn:
-              Ref: DbTCP5432TargetGroup
-        Type: forward
-      LoadBalancerArn:
-        Ref: LoadBalancer
-      Port: 5432
-      Protocol: TCP
-    Type: AWS::ElasticLoadBalancingV2::Listener
-  DbTCP5432TargetGroup:
-    Properties:
-      Port: 5432
-      Protocol: TCP
-      Tags:
-      - Key: com.docker.compose.project
-        Value: supersetOnAWS
-      TargetType: ip
-      VpcId: !Ref Vpc
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
   DbTaskDefinition:
     Properties:
       ContainerDefinitions:
@@ -686,7 +657,6 @@ Resources:
     Type: AWS::EFS::MountTarget
   RedisService:
     DependsOn:
-    - RedisTCP6379Listener
     - RedisNFSMountTargetOnSubnetB
     - RedisNFSMountTargetOnSubnetA
     Properties:
@@ -701,11 +671,6 @@ Resources:
         Type: ECS
       DesiredCount: 1
       LaunchType: FARGATE
-      LoadBalancers:
-      - ContainerName: redis
-        ContainerPort: 6379
-        TargetGroupArn:
-          Ref: RedisTCP6379TargetGroup
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
@@ -744,29 +709,6 @@ Resources:
       NamespaceId:
         Ref: CloudMap
     Type: AWS::ServiceDiscovery::Service
-  RedisTCP6379Listener:
-    Properties:
-      DefaultActions:
-      - ForwardConfig:
-          TargetGroups:
-          - TargetGroupArn:
-              Ref: RedisTCP6379TargetGroup
-        Type: forward
-      LoadBalancerArn:
-        Ref: LoadBalancer
-      Port: 6379
-      Protocol: TCP
-    Type: AWS::ElasticLoadBalancingV2::Listener
-  RedisTCP6379TargetGroup:
-    Properties:
-      Port: 6379
-      Protocol: TCP
-      Tags:
-      - Key: com.docker.compose.project
-        Value: supersetOnAWS
-      TargetType: ip
-      VpcId: !Ref Vpc
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
   RedisTaskDefinition:
     Properties:
       ContainerDefinitions:
