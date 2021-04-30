@@ -1,6 +1,6 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
-Description: "(xx-xxxx) - Superset on AWS offer customer a reliable, scalable and open-sourced BI applcation with least effort. Version v1.0.0"
+Description: "(SO8018) - Superset on AWS offer customer a reliable, scalable and open-sourced BI applcation with least effort. Version v1.0.0"
 
 Parameters:
   UserName:
@@ -127,14 +127,14 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: (xx-xxxx)
+          Value: (SO8018)
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: (xx-xxxx)
+          Value: (SO8018)
 
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -151,7 +151,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: (xx-xxxx) Public Subnet (AZ1)
+          Value: (SO8018) Public Subnet (AZ1)
 
   PublicSubnet2:
     Type: AWS::EC2::Subnet
@@ -162,7 +162,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: (xx-xxxx) Public Subnet (AZ2)
+          Value: (SO8018) Public Subnet (AZ2)
 
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
@@ -173,7 +173,7 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: (xx-xxxx) Private Subnet (AZ1)
+          Value: (SO8018) Private Subnet (AZ1)
 
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
@@ -184,7 +184,7 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: (xx-xxxx) Private Subnet (AZ2)
+          Value: (SO8018) Private Subnet (AZ2)
 
   NatGateway1EIP:
     Type: AWS::EC2::EIP
@@ -205,7 +205,7 @@ Resources:
       SubnetId: !Ref PublicSubnet1
       Tags:
         - Key: Name
-          Value: (xx-xxxx) Nat Gateway 1
+          Value: (SO8018) Nat Gateway 1
 
   NatGateway2:
     Type: AWS::EC2::NatGateway
@@ -214,7 +214,7 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       Tags:
         - Key: Name
-          Value: (xx-xxxx) Nat Gateway 2
+          Value: (SO8018) Nat Gateway 2
 
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
@@ -222,7 +222,7 @@ Resources:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: (xx-xxxx) Public Routes
+          Value: (SO8018) Public Routes
 
   DefaultPublicRoute:
     Type: AWS::EC2::Route
@@ -250,7 +250,7 @@ Resources:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: (xx-xxxx) Private Routes (AZ1)
+          Value: (SO8018) Private Routes (AZ1)
 
   DefaultPrivateRoute1:
     Type: AWS::EC2::Route
@@ -271,7 +271,7 @@ Resources:
       VpcId: !Ref Vpc
       Tags:
         - Key: Name
-          Value: (xx-xxxx) Private Routes (AZ2)
+          Value: (SO8018) Private Routes (AZ2)
 
   DefaultPrivateRoute2:
     Type: AWS::EC2::Route
