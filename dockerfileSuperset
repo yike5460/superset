@@ -20,6 +20,18 @@ RUN pip install sqlalchemy-redshift
 # clickhouse://{username}:{password}@{hostname}:{port}/{database}
 RUN pip install sqlalchemy-clickhouse
 
+# mssql://
+RUN pip install pymssql
+
+# oracle://
+RUN pip install cx_Oracle
+
+# db2+ibm_db://
+# RUN pip install ibm_db_sa
+
+# elasticsearch+http://{user}:{password}@{host}:9200/
+RUN pip install elasticsearch-dbapi
+
 # install prophet
 # option 1
 # RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
