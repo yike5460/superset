@@ -1,0 +1,186 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "(SO8018) - Apache Superset on AWS offers the customer a reliable, scalable and open-sourced BI application with least effort. Launches into a new VPC. Version v1.0.0 (qs-1s0fbq65f)"
+Metadata:
+  QuickStartDocumentation:
+    EntrypointName: "Parameters for deploying into an New VPC"
+    Order: "1"
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Account Configuration, set account info"
+        Parameters:
+          - SuperSetUserName
+          - SuperSetUserPassword
+          - WithExample
+          - InstallProphet
+      - Label:
+          default: "Network Configuration, create new VPC for AWS ECS Fargate"
+        Parameters:
+          - AvailabilityZones
+          - VPCCIDR
+          - PublicSubnet1CIDR
+          - PublicSubnet2CIDR
+          - PrivateSubnet1CIDR
+          - PrivateSubnet2CIDR
+    ParameterLabels:
+      SuperSetUserName:
+        default: "Initial Superset User Name"
+      SuperSetUserPassword:
+        default: "Initial Superset User Password"
+      WithExample:
+        default: "Pre-populate example dashboard"
+      InstallProphet:
+        default: "Install Prophet library"
+      AvailabilityZones:
+        default: "Availability Zones"
+      VPCCIDR:
+        default: "AWS ECS Fargate VPC CIDR Block"
+      PublicSubnet1CIDR:
+        default: "Public Subnet for the first Availability Zone"
+      PublicSubnet2CIDR:
+        default: "Public Subnet for the second Availability Zone"
+      PrivateSubnet1CIDR:
+        default: "Private Subnet for the first Availability Zone"
+      PrivateSubnet2CIDR:
+        default: "Private Subnet for the second Availability Zone"
+Parameters:
+  SuperSetUserName:
+    Type: String
+    Description: Superset user name.
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
+    Default: 'supersetuser'
+    MaxLength: "16"
+    MinLength: "1"
+  SuperSetUserPassword:
+    Description: Superset user password. Strict password policy is recommended.
+    AllowedPattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&\\-_])[A-Za-z\\d@$!%*?&\\-_]{8,}$"
+    ConstraintDescription: "Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ \" ') symbol"
+    MaxLength: "64"
+    MinLength: "8"
+    NoEcho: "True"
+    Type: String
+  WithExample:
+    Type: String
+    Default: "yes"
+    Description: >-
+      Enables or disables pre-populating official dashboard example.
+      no = DON'T pre-populate official dashboard example;
+      yes = pre-populate official dashboard example
+  InstallProphet:
+    Type: String
+    Default: "no"
+    Description: >-
+      Enables or disables Prophet library installation for Forecasting Analytics.
+      no = DON'T install Prophet for Forecasting Analytics;
+      yes = install Prophet to enable Forecasting Analytics
+  AvailabilityZones:
+    Description: 'List of Availability Zones to use for the subnets in the VPC. Note:
+      The logical order is preserved.'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+  VPCCIDR:
+    Type: String
+    Default: 192.168.0.0/16
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
+    ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
+    MinLength: 9
+    MaxLength: 18
+  PublicSubnet1CIDR:
+    Type: String
+    Default: 192.168.10.0/24
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
+    ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
+    MinLength: 9
+    MaxLength: 18
+  PublicSubnet2CIDR:
+    Type: String
+    Default: 192.168.11.0/24
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
+    AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
+    ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
+  PrivateSubnet1CIDR:
+    Type: String
+    Default: 192.168.20.0/24
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
+    ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
+  PrivateSubnet2CIDR:
+    Type: String
+    Default: 192.168.21.0/24
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    AllowedPattern: "(?:^$|(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2}))"
+    ConstraintDescription: "must be a valid IP CIDR range of the form x.x.x.x/x."
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-cn-quickstart
+    Description: S3 bucket name for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
+      or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/.]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), periods (.) and forward slash (/).
+    Default: quickstart-aws-superset/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), periods (.) and
+      forward slash (/).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'cn-north-1'
+    Description: Region where the Quick Start S3 bucket (QSS3BucketName) is
+      hosted. When using your own bucket, you must specify this value.
+    Type: String
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-cn-quickstart']
+Resources:
+  Vpc:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${AWS::Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml'
+        - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+          S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+      Parameters:
+        AvailabilityZones: !Join
+          - ','
+          - !Ref 'AvailabilityZones'
+        PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
+        PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
+        PrivateSubnet1ACIDR: !Ref 'PrivateSubnet1CIDR'
+        PrivateSubnet2ACIDR: !Ref 'PrivateSubnet2CIDR'
+        VPCCIDR: !Ref VPCCIDR
+  Superset:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/superset-new-vpc-workload.template.yaml'
+        - S3Region: !If [ UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion ]
+          S3Bucket: !If [ UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName ]
+      Parameters:
+        UserName: !Ref 'SuperSetUserName'
+        UserPassword: !Ref 'SuperSetUserPassword'
+        WithExample: !Ref 'WithExample'
+        InstallProphet: !Ref 'InstallProphet'
+        AvailabilityZones: !Join
+          - ','
+          - !Ref 'AvailabilityZones'
+        PublicSubnet1ID: 
+          Fn::GetAtt: [Vpc, Outputs.PublicSubnet1ID]
+        PublicSubnet2ID: 
+          Fn::GetAtt: [Vpc, Outputs.PublicSubnet2ID]
+        PrivateSubnet1AID: 
+          Fn::GetAtt: [Vpc, Outputs.PrivateSubnet1AID]
+        PrivateSubnet2AID: 
+          Fn::GetAtt: [Vpc, Outputs.PrivateSubnet2AID]
+        VpcID: 
+          Fn::GetAtt: [Vpc, Outputs.VPCID]
+Outputs:
+  SupersetConsole:
+    Description: SupersetConsole URL
+    Value: !GetAtt [Superset, Outputs.SupersetConsole]
