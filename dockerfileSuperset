@@ -18,7 +18,8 @@ RUN pip install "PyAthena>1.2.0"
 RUN pip install sqlalchemy-redshift
 
 # clickhouse://{username}:{password}@{hostname}:{port}/{database}
-RUN pip install sqlalchemy-clickhouse
+# RUN pip install sqlalchemy-clickhouse
+RUN pip install clickhouse-driver==0.2.0 && pip install clickhouse-sqlalchemy==0.1.6
 
 # mssql://
 RUN pip install pymssql
