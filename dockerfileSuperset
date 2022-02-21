@@ -1,4 +1,4 @@
-FROM apache/superset
+FROM apache/superset:1.4.1
 # Switching to root to install the required packages
 USER root
 
@@ -32,6 +32,9 @@ RUN pip install cx_Oracle
 
 # elasticsearch+http://{user}:{password}@{host}:9200/
 RUN pip install elasticsearch-dbapi
+
+# bigquery, refer to https://superset.apache.org/docs/databases/bigquery/
+RUN pip install sqlalchemy-bigquery
 
 # install prophet
 # option 1
