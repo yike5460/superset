@@ -1,3 +1,5 @@
+
+
 <!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
@@ -88,7 +90,7 @@ Superset provides:
 * Out-of-the-box support for most SQL-speaking databases
 * Seamless, in-memory asynchronous caching and queries
 * An extensible security model that allows configuration of very intricate rules on
-    on who can access which product features and datasets.
+    who can access which product features and datasets.
 * Integration with major
     authentication backends (database, OpenID, LDAP, OAuth, REMOTE_USER, etc)
 * The ability to add custom visualization plugins
